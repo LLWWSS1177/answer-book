@@ -3,59 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>答案之书</title>
+    <title>答案之书 - 随机解惑</title>
     <style>
-        * {margin: 0; padding: 0; box-sizing: border-box;}
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        /* 页面背景 */
         body {
             min-height: 100vh;
+            background: linear-gradient(135deg, #f0f8fb 0%, #e8f4f8 100%);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #f5f5f5;
-            font-family: "微软雅黑", sans-serif;
+            padding: 20px;
         }
-        .answer-box {
-            width: 80%;
-            max-width: 500px;
-            padding: 40px 20px;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+
+        /* 答案卡片容器 */
+        .answer-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(149, 157, 165, 0.15);
+            padding: 45px 30px;
+            width: 100%;
+            max-width: 550px;
             text-align: center;
-            margin-bottom: 30px;
         }
-        #answer {
-            font-size: 24px;
-            color: #333;
+
+        /* 答案文本区域 */
+        #answer-text {
+            font-size: 26px;
+            color: #2d3748;
             line-height: 1.8;
-            margin-bottom: 20px;
+            margin-bottom: 35px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
         }
+
+        /* 刷新按钮 */
         #refresh-btn {
-            padding: 10px 30px;
+            padding: 12px 40px;
             border: none;
-            border-radius: 25px;
-            background-color: #4285f4;
-            color: white;
-            font-size: 16px;
+            border-radius: 30px;
+            background: linear-gradient(90deg, #4299e1, #38b2ac);
+            color: #ffffff;
+            font-size: 18px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
         }
+
         #refresh-btn:hover {
-            background-color: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(66, 153, 225, 0.4);
+        }
+
+        #refresh-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 答案淡入动画 */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.6s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="answer-box">
-        <div id="answer">点击下方按钮获取答案</div>
+    <div class="answer-card">
+        <div id="answer-text" class="fade-in"></div>
         <button id="refresh-btn">再问一次</button>
     </div>
 
     <script>
-        // 答案之书完整答案库（260条：原版核心+幽默搞怪+劝退类）
-        const answerList = [
-            // 一、《答案之书》原版核心答案
+        // 答案之书完整答案库（原版核心+幽默搞怪+劝退类）
+        const answerLibrary = [
+            // 一、原版核心答案
             "别太赶了", "别想了", "不然呢？", "要求不要太高", "这是必然的，不要抗拒", "不要做得过火了",
             "大胆一点", "大方一点", "毫无疑问", "好运将会降临", "肯定的", "没错", "还有别的选择",
             "你将取得成功", "需要冒险", "要主动", "你在开玩笑吗？", "你做什么都没用", "千万不能失败",
@@ -89,6 +125,7 @@
             "别迷茫", "找到方向", "这是机遇", "别错过", "抓住机会", "这是挑战", "勇敢面对", "别逃避",
             "直面问题", "这会过去的", "别难过", "开心点", "这很有趣", "保持好奇", "别麻木", "热爱生活",
             "这是缘分", "别强求", "顺其自然", "这是命运", "别抗拒", "坦然面对",
+
             // 二、幽默搞怪类答案
             "建议先吃顿好的，吃饱了才有力气纠结", "答案在奶茶里，喝到第三杯就会显现",
             "这件事得看运气——主要看你今天有没有捡到钱", "别想了，你家猫已经替你做了决定",
@@ -112,6 +149,7 @@
             "建议问你的输入法，打出来的第一个词就是答案", "这件事就像拆盲盒，不管怎样都有惊喜（或惊吓）",
             "没钱解决不了的问题，有钱没解决不了的——包括这件事",
             "其实你内心早就有答案，只是想找个人夸你做得对",
+
             // 三、不行/劝退类答案
             "这事真不行，别硬撑了", "听我的，赶紧放弃这个念头", "此路不通，换条道走",
             "不建议你这么做，容易踩坑", "算了吧，大概率会后悔", "方向错了，再努力也白费",
@@ -122,24 +160,19 @@
             "此方案驳回，重新规划", "别犟了，行不通就是行不通"
         ];
 
-        const answerDom = document.getElementById("answer");
-        const refreshBtn = document.getElementById("refresh-btn");
+        // 获取页面元素
+        const answerText = document.getElementById('answer-text');
+        const refreshBtn = document.getElementById('refresh-btn');
 
         // 随机获取答案函数
         function getRandomAnswer() {
-            const randomIndex = Math.floor(Math.random() * answerList.length);
-            return answerList[randomIndex];
+            const randomIndex = Math.floor(Math.random() * answerLibrary.length);
+            return answerLibrary[randomIndex];
         }
 
-        // 页面加载自动生成答案
-        window.onload = function() {
-            answerDom.innerText = getRandomAnswer();
-        }
-
-        // 点击按钮刷新答案
-        refreshBtn.addEventListener("click", function() {
-            answerDom.innerText = getRandomAnswer();
-        });
-    </script>
-</body>
-</html>
+        // 渲染答案并添加动画
+        function renderAnswer() {
+            answerText.classList.remove('fade-in');
+            void answerText.offsetWidth; // 触发重绘
+            answerText.classList.add('fade-in');
+            answer
